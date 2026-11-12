@@ -1,0 +1,233 @@
+<div class="sw-page">
+  <header class="sw-page-header">
+    <div>
+      <h1 class="sw-page-title">Panel general de inventario</h1>
+      <p class="sw-page-subtitle">
+        Resumen operativo de {{ store.settings().business.commercialName }} · Valores expresados en
+        pesos colombianos (COP)
+      </p>
+    </div>
+    <div class="sw-header-actions">
+      <a routerLink="/productos" class="sw-btn sw-btn-secondary">Ver catálogo</a>
+      <a routerLink="/inventario" class="sw-btn sw-btn-primary">
+        <lucide-icon [img]="PlusIcon" [size]="16" />
+        <span>Registrar movimiento</span>
+      </a>
+    </div>
+  </header>
+
+  <section class="kpi-grid">
+    <article class="sw-card kpi-card">
+      <div class="kpi-head">
+        <span class="kpi-label">Total de productos</span>
+        <span class="kpi-icon neutral"><lucide-icon [img]="PackageIcon" [size]="18" /></span>
+      </div>
+      <div class="kpi-value sw-mono">{{ num(store.kpis().totalProducts) }}</div>
+      <div class="kpi-meta">{{ num(store.kpis().totalUnits) }} unidades totales en bodega</div>
+    </article>
+
+    <article class="sw-card kpi-card">
+      <div class="kpi-head">
+        <span class="kpi-label">Stock bajo</span>
+        <span class="kpi-icon warning"><lucide-icon [img]="AlertTriangleIcon" [size]="18" /></span>
+      </div>
+      <div class="kpi-value sw-mono">{{ num(store.kpis().lowStockCount) }}</div>
+      <div class="kpi-meta">Por debajo o igual al stock mínimo</div>
+    </article>
+
+    <article class="sw-card kpi-card">
+      <div class="kpi-head">
+        <span class="kpi-label">Productos agotados</span>
+        <span class="kpi-icon danger"><lucide-icon [img]="PackageXIcon" [size]="18" /></span>
+      </div>
+      <div class="kpi-value sw-mono">{{ num(store.kpis().outOfStockCount) }}</div>
+      <div class="kpi-meta">Requieren reposición inmediata</div>
+    </article>
+
+    <article class="sw-card kpi-card">
+      <div class="kpi-head">
+        <span class="kpi-label">Valor total inventario</span>
+        <span class="kpi-icon teal"><lucide-icon [img]="DollarSignIcon" [size]="18" /></span>
+      </div>
+      <div class="kpi-value sw-mono">{{ cop(store.kpis().totalInventoryValue) }}</div>
+      <div class="kpi-meta">Venta potencial: {{ cop(store.kpis().potentialRetailValue) }}</div>
+    </article>
+
+    <article class="sw-card kpi-card">
+      <div class="kpi-head">
+        <span class="kpi-label">Entradas del mes</span>
+        <span class="kpi-icon success"><lucide-icon [img]="ArrowDownLeftIcon" [size]="18" /></span>
+      </div>
+      <div class="kpi-value sw-mono">{{ num(store.kpis().monthlyEntries) }}</div>
+      <div class="kpi-meta">Unidades ingresadas (últimos 30 días)</div>
+    </article>
+
+    <article class="sw-card kpi-card">
+      <div class="kpi-head">
+        <span class="kpi-label">Salidas del mes</span>
+        <span class="kpi-icon info"><lucide-icon [img]="ArrowUpRightIcon" [size]="18" /></span>
+      </div>
+      <div class="kpi-value sw-mono">{{ num(store.kpis().monthlyExits) }}</div>
+      <div class="kpi-meta">Unidades despachadas (últimos 30 días)</div>
+    </article>
+  </section>
+
+  <section class="charts-main-grid">
+    <article class="sw-card chart-wide">
+      <div class="sw-card-header">
+        <div>
+          <h2 class="sw-card-title">Entradas y salidas — Últimos 30 días</h2>
+          <p class="sw-card-subtitle">Flujo diario de unidades ingresadas frente a despachos</p>
+        </div>
+      </div>
+      <div class="sw-card-body">
+        <app-chart-canvas [config]="entriesVsExitsConfig()" [height]="270" />
+      </div>
+    </article>
+
+    <article class="sw-card">
+      <div class="sw-card-header">
+        <div>
+          <h2 class="sw-card-title">Distribución por categorías</h2>
+          <p class="sw-card-subtitle">Unidades disponibles según categoría</p>
+        </div>
+      </div>
+      <div class="sw-card-body">
+        <app-chart-canvas [config]="categoryDistributionConfig()" [height]="270" />
+      </div>
+    </article>
+  </section>
+
+  <section class="charts-secondary-grid">
+    <article class="sw-card">
+      <div class="sw-card-header">
+        <div>
+          <h2 class="sw-card-title">Productos con mayor rotación</h2>
+          <p class="sw-card-subtitle">Top 6 referencias por volumen de salidas</p>
+        </div>
+      </div>
+      <div class="sw-card-body">
+        <app-chart-canvas [config]="topRotationConfig()" [height]="240" />
+      </div>
+    </article>
+
+    <article class="sw-card">
+      <div class="sw-card-header">
+        <div>
+          <h2 class="sw-card-title">Recomendaciones operativas</h2>
+          <p class="sw-card-subtitle">Sugerencias generadas mediante reglas y rotación</p>
+        </div>
+        <a routerLink="/alertas" class="text-link">
+          <span>Ir a Alertas</span>
+          <lucide-icon [img]="ArrowRightIcon" [size]="14" />
+        </a>
+      </div>
+      <div class="sw-card-body rec-list">
+        @for (rec of store.recommendations(); track rec.id) {
+          <div class="rec-item" [class]="'rec-' + rec.severity">
+            <div class="rec-icon"><lucide-icon [img]="LightbulbIcon" [size]="16" /></div>
+            <div>
+              <div class="rec-title">{{ rec.title }}</div>
+              <div class="rec-msg">{{ rec.message }}</div>
+            </div>
+          </div>
+        }
+      </div>
+    </article>
+  </section>
+
+  <section class="bottom-grid">
+    <article class="sw-card">
+      <div class="sw-card-header">
+        <div>
+          <h2 class="sw-card-title">Movimientos recientes</h2>
+          <p class="sw-card-subtitle">Últimas operaciones registradas en inventario</p>
+        </div>
+        <a routerLink="/inventario" class="text-link">
+          <span>Ver historial</span>
+          <lucide-icon [img]="ArrowRightIcon" [size]="14" />
+        </a>
+      </div>
+      <div class="sw-table-wrap">
+        <table class="sw-table">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Tipo</th>
+              <th>Cantidad</th>
+              <th>Fecha</th>
+              <th>Responsable</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (m of recentMovements(); track m.id) {
+              <tr>
+                <td>
+                  <strong>{{ productName(m.productId) }}</strong>
+                </td>
+                <td>
+                  <app-status-badge
+                    [label]="movementLabel(m.type)"
+                    [tone]="isInbound(m.type) ? 'success' : 'info'"
+                  />
+                </td>
+                <td class="sw-mono">
+                  <span [class.qty-in]="isInbound(m.type)" [class.qty-out]="!isInbound(m.type)">
+                    {{ isInbound(m.type) ? '+' : '-' }}{{ m.quantity }}
+                  </span>
+                </td>
+                <td>{{ formatDate(m.date) }}</td>
+                <td>{{ m.userName }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <article class="sw-card">
+      <div class="sw-card-header">
+        <div>
+          <h2 class="sw-card-title">Alertas prioritarias</h2>
+          <p class="sw-card-subtitle">Productos que requieren atención inmediata</p>
+        </div>
+        <a routerLink="/alertas" class="text-link">
+          <span>Gestionar</span>
+          <lucide-icon [img]="ArrowRightIcon" [size]="14" />
+        </a>
+      </div>
+      <div class="alert-list">
+        @for (alert of priorityAlerts(); track alert.id) {
+          <div class="alert-row">
+            <div class="alert-main">
+              <div class="alert-top">
+                <strong>{{ alert.productName }}</strong>
+                <app-status-badge
+                  [label]="alert.priority"
+                  [tone]="
+                    alert.priority === 'CRITICA'
+                      ? 'danger'
+                      : alert.priority === 'ALTA'
+                        ? 'warning'
+                        : 'info'
+                  "
+                />
+              </div>
+              <p class="alert-rec">{{ alert.recommendation }}</p>
+            </div>
+            <div class="alert-stock sw-mono">
+              <span>{{ alert.currentStock }} uds</span>
+              <small>Mín: {{ alert.minStock }}</small>
+            </div>
+          </div>
+        } @empty {
+          <div class="sw-empty-state">
+            <h4>Sin alertas activas</h4>
+            <p>El inventario se encuentra dentro de los niveles configurados.</p>
+          </div>
+        }
+      </div>
+    </article>
+  </section>
+</div>
+

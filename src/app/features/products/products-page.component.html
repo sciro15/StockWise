@@ -1,0 +1,344 @@
+<div class="sw-page">
+  <header class="sw-page-header">
+    <div>
+      <h1 class="sw-page-title">Gestión de productos</h1>
+      <p class="sw-page-subtitle">
+        Catálogo completo, precios en COP, niveles mínimos y control de existencias
+      </p>
+    </div>
+    <div class="sw-header-actions">
+      <button type="button" class="sw-btn sw-btn-primary" (click)="openCreateModal()">
+        <lucide-icon [img]="PlusIcon" [size]="16" />
+        <span>Registrar producto</span>
+      </button>
+    </div>
+  </header>
+
+  <section class="sw-card">
+    <div class="sw-toolbar">
+      <div class="sw-filter-group">
+        <div class="sw-search-input-wrap">
+          <span class="sw-search-icon"><lucide-icon [img]="SearchIcon" [size]="15" /></span>
+          <input
+            type="search"
+            class="sw-input"
+            placeholder="Buscar por nombre, SKU o código..."
+            [value]="searchTerm()"
+            (input)="onSearch($any($event.target).value)"
+          />
+        </div>
+
+        <select
+          class="sw-select filter-select"
+          [value]="categoryFilter()"
+          (change)="onCategoryChange($any($event.target).value)"
+          aria-label="Filtrar por categoría"
+        >
+          <option value="">Todas las categorías</option>
+          @for (cat of store.categories(); track cat.id) {
+            <option [value]="cat.id">{{ cat.name }}</option>
+          }
+        </select>
+
+        <select
+          class="sw-select filter-select"
+          [value]="statusFilter()"
+          (change)="onStatusChange($any($event.target).value)"
+          aria-label="Filtrar por estado"
+        >
+          <option value="">Todos los estados</option>
+          <option value="NORMAL">Óptimo</option>
+          <option value="STOCK_BAJO">Stock bajo</option>
+          <option value="AGOTADO">Agotado</option>
+          <option value="EXCESO">Exceso</option>
+        </select>
+      </div>
+
+      <span class="result-count">{{ filteredProducts().length }} producto(s)</span>
+    </div>
+
+    <div class="sw-table-wrap">
+      <table class="sw-table">
+        <thead>
+          <tr>
+            <th>Imagen</th>
+            <th class="sw-sortable-th" (click)="toggleSort('name')">
+              Nombre <lucide-icon [img]="ArrowUpDownIcon" [size]="12" />
+            </th>
+            <th class="sw-sortable-th" (click)="toggleSort('sku')">
+              SKU <lucide-icon [img]="ArrowUpDownIcon" [size]="12" />
+            </th>
+            <th>Categoría</th>
+            <th>Proveedor</th>
+            <th class="sw-sortable-th" (click)="toggleSort('purchasePrice')">
+              P. Compra <lucide-icon [img]="ArrowUpDownIcon" [size]="12" />
+            </th>
+            <th class="sw-sortable-th" (click)="toggleSort('salePrice')">
+              P. Venta <lucide-icon [img]="ArrowUpDownIcon" [size]="12" />
+            </th>
+            <th class="sw-sortable-th" (click)="toggleSort('stock')">
+              Existencias <lucide-icon [img]="ArrowUpDownIcon" [size]="12" />
+            </th>
+            <th>Stock mín.</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of pagedProducts(); track p.id) {
+            <tr>
+              <td>
+                <img [src]="p.imageUrl" [alt]="p.name" class="product-thumb" />
+              </td>
+              <td>
+                <div class="product-name">{{ p.name }}</div>
+                <div class="product-barcode">{{ p.barcode || 'Sin código' }}</div>
+              </td>
+              <td><span class="sku-tag sw-mono">{{ p.sku }}</span></td>
+              <td>{{ categoryName(p.categoryId) }}</td>
+              <td class="supplier-cell">{{ supplierName(p.supplierId) }}</td>
+              <td class="sw-mono">{{ cop(p.purchasePrice) }}</td>
+              <td class="sw-mono"><strong>{{ cop(p.salePrice) }}</strong></td>
+              <td class="sw-mono"><strong>{{ p.stock }}</strong></td>
+              <td class="sw-mono">{{ p.minStock }}</td>
+              <td>
+                <app-status-badge [label]="statusLabel(p)" [tone]="statusTone(p)" />
+              </td>
+              <td>
+                <div class="row-actions">
+                  <button
+                    type="button"
+                    class="sw-icon-btn"
+                    title="Consultar detalles"
+                    (click)="detailProduct.set(p)"
+                  >
+                    <lucide-icon [img]="EyeIcon" [size]="16" />
+                  </button>
+                  <button
+                    type="button"
+                    class="sw-icon-btn"
+                    title="Editar producto"
+                    (click)="openEditModal(p)"
+                  >
+                    <lucide-icon [img]="PencilIcon" [size]="16" />
+                  </button>
+                  <button
+                    type="button"
+                    class="sw-icon-btn danger"
+                    title="Eliminar producto"
+                    (click)="deleteTarget.set(p)"
+                  >
+                    <lucide-icon [img]="TrashIcon" [size]="16" />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="11">
+                <div class="sw-empty-state">
+                  <lucide-icon [img]="PackageIcon" [size]="32" />
+                  <h4>No se encontraron productos</h4>
+                  <p>Ajusta los filtros de búsqueda o registra un nuevo producto en el catálogo.</p>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sw-pagination">
+      <span>Página {{ page() }} de {{ totalPages() }}</span>
+      <div class="sw-header-actions">
+        <button
+          type="button"
+          class="sw-btn sw-btn-secondary sw-btn-sm"
+          [disabled]="page() <= 1"
+          (click)="page.set(page() - 1)"
+        >
+          Anterior
+        </button>
+        <button
+          type="button"
+          class="sw-btn sw-btn-secondary sw-btn-sm"
+          [disabled]="page() >= totalPages()"
+          (click)="page.set(page() + 1)"
+        >
+          Siguiente
+        </button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<app-modal
+  [open]="formOpen()"
+  [title]="editingProduct() ? 'Editar producto' : 'Registrar nuevo producto'"
+  subtitle="Completa la ficha técnica y los valores comerciales en COP"
+  maxWidth="700px"
+  (closed)="formOpen.set(false)"
+>
+  @if (formError()) {
+    <div class="form-alert">{{ formError() }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="submitProduct()" class="sw-form-grid">
+    <div class="sw-field sw-col-span-2">
+      <label class="sw-label">Nombre del producto <span class="req">*</span></label>
+      <input type="text" class="sw-input" formControlName="name" placeholder="Ej. Monitor 27 pulgadas IPS" />
+    </div>
+
+    <div class="sw-field">
+      <label class="sw-label">SKU único <span class="req">*</span></label>
+      <input type="text" class="sw-input" formControlName="sku" placeholder="Ej. TEC-MON-025" />
+    </div>
+
+    <div class="sw-field">
+      <label class="sw-label">Código de barras</label>
+      <input type="text" class="sw-input" formControlName="barcode" placeholder="7701234000999" />
+    </div>
+
+    <div class="sw-field">
+      <label class="sw-label">Categoría <span class="req">*</span></label>
+      <select class="sw-select" formControlName="categoryId">
+        @for (cat of store.categories(); track cat.id) {
+          <option [value]="cat.id">{{ cat.name }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="sw-field">
+      <label class="sw-label">Proveedor <span class="req">*</span></label>
+      <select class="sw-select" formControlName="supplierId">
+        @for (sup of store.suppliers(); track sup.id) {
+          <option [value]="sup.id">{{ sup.commercialName }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="sw-field">
+      <label class="sw-label">Precio de compra (COP) <span class="req">*</span></label>
+      <input type="number" class="sw-input" formControlName="purchasePrice" min="1" />
+    </div>
+
+    <div class="sw-field">
+      <label class="sw-label">Precio de venta (COP) <span class="req">*</span></label>
+      <input type="number" class="sw-input" formControlName="salePrice" min="1" />
+    </div>
+
+    <div class="sw-field">
+      <label class="sw-label">
+        {{ editingProduct() ? 'Existencias actuales' : 'Cantidad inicial' }}
+        <span class="req">*</span>
+      </label>
+      <input type="number" class="sw-input" formControlName="stock" min="0" />
+    </div>
+
+    <div class="sw-field">
+      <label class="sw-label">Stock mínimo <span class="req">*</span></label>
+      <input type="number" class="sw-input" formControlName="minStock" min="0" />
+    </div>
+
+    <div class="sw-field sw-col-span-2">
+      <label class="sw-label">Imagen (URL o subir archivo)</label>
+      <div class="img-input-row">
+        <input
+          type="text"
+          class="sw-input"
+          formControlName="imageUrl"
+          placeholder="https://... o selecciona una imagen local"
+        />
+        <label class="sw-btn sw-btn-secondary upload-btn">
+          Subir
+          <input type="file" accept="image/*" hidden (change)="onImageFileSelected($event)" />
+        </label>
+      </div>
+    </div>
+
+    <div class="sw-field sw-col-span-2">
+      <label class="sw-label">Descripción</label>
+      <textarea
+        class="sw-textarea"
+        formControlName="description"
+        placeholder="Especificaciones técnicas o detalles del producto..."
+      ></textarea>
+    </div>
+
+    <div class="modal-footer sw-col-span-2">
+      <button type="button" class="sw-btn sw-btn-secondary" (click)="formOpen.set(false)">
+        Cancelar
+      </button>
+      <button type="submit" class="sw-btn sw-btn-primary">
+        {{ editingProduct() ? 'Guardar cambios' : 'Registrar producto' }}
+      </button>
+    </div>
+  </form>
+</app-modal>
+
+<app-modal
+  [open]="detailProduct() !== null"
+  [title]="detailProduct()?.name ?? 'Detalle del producto'"
+  [subtitle]="detailProduct()?.sku ?? ''"
+  maxWidth="580px"
+  (closed)="detailProduct.set(null)"
+>
+  @if (detailProduct(); as p) {
+    <div class="detail-top">
+      <img [src]="p.imageUrl" [alt]="p.name" class="detail-img" />
+      <div class="detail-head-info">
+        <app-status-badge [label]="statusLabel(p)" [tone]="statusTone(p)" />
+        <p class="detail-desc">{{ p.description || 'Sin descripción registrada.' }}</p>
+      </div>
+    </div>
+
+    <div class="detail-grid">
+      <div class="detail-box">
+        <span>Categoría</span>
+        <strong>{{ categoryName(p.categoryId) }}</strong>
+      </div>
+      <div class="detail-box">
+        <span>Proveedor</span>
+        <strong>{{ supplierName(p.supplierId) }}</strong>
+      </div>
+      <div class="detail-box">
+        <span>Precio compra</span>
+        <strong class="sw-mono">{{ cop(p.purchasePrice) }}</strong>
+      </div>
+      <div class="detail-box">
+        <span>Precio venta</span>
+        <strong class="sw-mono">{{ cop(p.salePrice) }}</strong>
+      </div>
+      <div class="detail-box">
+        <span>Margen bruto</span>
+        <strong class="sw-mono">{{ marginPercent(p) }}</strong>
+      </div>
+      <div class="detail-box">
+        <span>Valoración en stock</span>
+        <strong class="sw-mono">{{ cop(p.stock * p.purchasePrice) }}</strong>
+      </div>
+      <div class="detail-box">
+        <span>Existencias / Mínimo</span>
+        <strong class="sw-mono">{{ p.stock }} / {{ p.minStock }} uds</strong>
+      </div>
+      <div class="detail-box">
+        <span>Última actualización</span>
+        <strong>{{ formatDate(p.updatedAt) }}</strong>
+      </div>
+    </div>
+  }
+</app-modal>
+
+<app-confirm-dialog
+  [open]="deleteTarget() !== null"
+  title="Eliminar producto"
+  [message]="
+    '¿Seguro que deseas eliminar ' +
+    (deleteTarget()?.name ?? 'este producto') +
+    '? Esta acción retirará el producto del catálogo.'
+  "
+  confirmLabel="Sí, eliminar"
+  (cancelled)="deleteTarget.set(null)"
+  (confirmed)="confirmDelete()"
+/>
+

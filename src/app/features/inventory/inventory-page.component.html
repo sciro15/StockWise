@@ -1,0 +1,198 @@
+<div class="sw-page">
+  <header class="sw-page-header">
+    <div>
+      <h1 class="sw-page-title">Control de inventario y movimientos</h1>
+      <p class="sw-page-subtitle">
+        Registra entradas, salidas y ajustes con actualización automática de existencias y alertas
+      </p>
+    </div>
+  </header>
+
+  <section class="inventory-layout">
+    <article class="sw-card">
+      <div class="sw-card-header">
+        <div>
+          <h2 class="sw-card-title">Registrar movimiento</h2>
+          <p class="sw-card-subtitle">Toda operación genera trazabilidad inmediata</p>
+        </div>
+      </div>
+
+      <div class="sw-card-body">
+        @if (formError()) {
+          <div class="form-alert">{{ formError() }}</div>
+        }
+
+        <form [formGroup]="form" (ngSubmit)="submitMovement()" class="movement-form">
+          <div class="sw-field">
+            <label class="sw-label">Tipo de movimiento <span class="req">*</span></label>
+            <select class="sw-select" formControlName="type">
+              <option value="ENTRADA">Entrada (Compra / Reposición)</option>
+              <option value="SALIDA">Salida (Venta / Despacho)</option>
+              <option value="AJUSTE_POSITIVO">Ajuste positivo (Sobrante / Devolución)</option>
+              <option value="AJUSTE_NEGATIVO">Ajuste negativo (Avería / Pérdida)</option>
+            </select>
+          </div>
+
+          <div class="sw-field">
+            <label class="sw-label">Producto <span class="req">*</span></label>
+            <select class="sw-select" formControlName="productId">
+              @for (p of store.products(); track p.id) {
+                <option [value]="p.id">{{ p.name }} ({{ p.sku }}) — Stock: {{ p.stock }}</option>
+              }
+            </select>
+          </div>
+
+          @if (selectedProduct(); as prod) {
+            <div class="stock-preview" [class.invalid-preview]="(projectedStock() ?? 0) < 0">
+              <div>
+                <span class="preview-label">Stock actual</span>
+                <strong class="sw-mono">{{ prod.stock }} uds</strong>
+              </div>
+              <div class="preview-arrow">→</div>
+              <div>
+                <span class="preview-label">Stock proyectado</span>
+                <strong class="sw-mono">{{ projectedStock() }} uds</strong>
+              </div>
+              <div>
+                <span class="preview-label">Mínimo</span>
+                <strong class="sw-mono">{{ prod.minStock }} uds</strong>
+              </div>
+            </div>
+          }
+
+          <div class="two-cols">
+            <div class="sw-field">
+              <label class="sw-label">Cantidad <span class="req">*</span></label>
+              <input type="number" class="sw-input" formControlName="quantity" min="1" />
+            </div>
+
+            <div class="sw-field">
+              <label class="sw-label">Fecha <span class="req">*</span></label>
+              <input type="date" class="sw-input" formControlName="date" />
+            </div>
+          </div>
+
+          <div class="sw-field">
+            <label class="sw-label">Motivo <span class="req">*</span></label>
+            <input
+              type="text"
+              class="sw-input"
+              formControlName="reason"
+              placeholder="Ej. Compra a proveedor / Venta mostrador"
+            />
+          </div>
+
+          <div class="sw-field">
+            <label class="sw-label">Observaciones</label>
+            <textarea
+              class="sw-textarea"
+              formControlName="notes"
+              placeholder="Número de factura, orden de despacho o detalle del conteo..."
+            ></textarea>
+          </div>
+
+          <button type="submit" class="sw-btn sw-btn-primary submit-full">
+            <lucide-icon [img]="PlusCircleIcon" [size]="17" />
+            <span>Confirmar movimiento</span>
+          </button>
+        </form>
+      </div>
+    </article>
+
+    <article class="sw-card">
+      <div class="sw-toolbar">
+        <div class="sw-filter-group">
+          <div class="sw-search-input-wrap">
+            <span class="sw-search-icon"><lucide-icon [img]="SearchIcon" [size]="15" /></span>
+            <input
+              type="search"
+              class="sw-input"
+              placeholder="Buscar producto, SKU, motivo o usuario..."
+              [value]="searchTerm()"
+              (input)="searchTerm.set($any($event.target).value)"
+            />
+          </div>
+
+          <select
+            class="sw-select type-select"
+            [value]="typeFilter()"
+            (change)="typeFilter.set($any($event.target).value)"
+          >
+            <option value="">Todos los tipos</option>
+            <option value="ENTRADA">Entradas</option>
+            <option value="SALIDA">Salidas</option>
+            <option value="AJUSTE_POSITIVO">Ajustes positivos</option>
+            <option value="AJUSTE_NEGATIVO">Ajustes negativos</option>
+          </select>
+        </div>
+
+        <span class="count-pill">{{ filteredMovements().length }} registro(s)</span>
+      </div>
+
+      <div class="sw-table-wrap">
+        <table class="sw-table">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Producto</th>
+              <th>Tipo</th>
+              <th>Cantidad</th>
+              <th>Stock (Antes → Después)</th>
+              <th>Motivo</th>
+              <th>Responsable</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (m of filteredMovements(); track m.id) {
+              <tr>
+                <td>{{ formatDate(m.date) }}</td>
+                <td>
+                  <div class="prod-title">{{ productName(m.productId) }}</div>
+                  <div class="prod-sub sw-mono">{{ productSku(m.productId) }}</div>
+                </td>
+                <td>
+                  <app-status-badge
+                    [label]="labelForType(m.type)"
+                    [tone]="
+                      m.type === 'ENTRADA'
+                        ? 'success'
+                        : m.type === 'SALIDA'
+                          ? 'info'
+                          : m.type === 'AJUSTE_POSITIVO'
+                            ? 'teal'
+                            : 'warning'
+                    "
+                  />
+                </td>
+                <td class="sw-mono">
+                  <strong [class.qty-in]="isInbound(m.type)" [class.qty-out]="!isInbound(m.type)">
+                    {{ isInbound(m.type) ? '+' : '-' }}{{ m.quantity }}
+                  </strong>
+                </td>
+                <td class="sw-mono">{{ m.previousStock }} → {{ m.newStock }}</td>
+                <td>
+                  <div>{{ m.reason }}</div>
+                  @if (m.notes) {
+                    <div class="prod-sub">{{ m.notes }}</div>
+                  }
+                </td>
+                <td>{{ m.userName }}</td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="7">
+                  <div class="sw-empty-state">
+                    <lucide-icon [img]="ArrowLeftRightIcon" [size]="30" />
+                    <h4>No hay movimientos que coincidan</h4>
+                    <p>Prueba cambiando el filtro de búsqueda o registra un movimiento nuevo.</p>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </article>
+  </section>
+</div>
+

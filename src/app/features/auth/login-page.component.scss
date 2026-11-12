@@ -1,0 +1,278 @@
+.auth-layout {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  background: var(--sw-bg);
+
+  @media (max-width: 960px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.auth-brand-panel {
+  background: var(--sw-navy-900);
+  color: #ffffff;
+  padding: 40px 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  @media (max-width: 960px) {
+    display: none;
+  }
+}
+
+.brand-content {
+  max-width: 520px;
+}
+
+.brand-hero {
+  margin-top: 48px;
+
+  .eyebrow {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(13, 148, 136, 0.2);
+    color: #5eead4;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+
+  h1 {
+    font-size: 30px;
+    line-height: 1.2;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  p {
+    margin-top: 14px;
+    font-size: 15px;
+    color: #cbd5e1;
+    line-height: 1.6;
+  }
+}
+
+.feature-list {
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+
+  strong {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  span {
+    display: block;
+    font-size: 13px;
+    color: #94a3b8;
+    margin-top: 2px;
+  }
+}
+
+.feature-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 9px;
+  background: var(--sw-navy-800);
+  color: #5eead4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.brand-footer {
+  font-size: 12.5px;
+  color: #94a3b8;
+}
+
+.auth-form-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 20px;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 430px;
+  background: #ffffff;
+  border: 1px solid var(--sw-border);
+  border-radius: var(--sw-radius-lg);
+  padding: 32px;
+  box-shadow: var(--sw-shadow-md);
+}
+
+.mobile-logo {
+  display: none;
+  margin-bottom: 20px;
+
+  @media (max-width: 960px) {
+    display: block;
+  }
+}
+
+.card-head {
+  h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--sw-text-primary);
+  }
+
+  p {
+    margin-top: 4px;
+    font-size: 13.5px;
+    color: var(--sw-text-secondary);
+  }
+}
+
+.demo-box {
+  margin-top: 18px;
+  padding: 12px 14px;
+  border-radius: var(--sw-radius-md);
+  background: var(--sw-teal-50);
+  border: 1px solid var(--sw-teal-100);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.demo-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--sw-teal-700);
+}
+
+.demo-creds {
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  color: var(--sw-text-primary);
+  margin-top: 2px;
+}
+
+.alert-error {
+  margin-top: 14px;
+  padding: 10px 12px;
+  border-radius: var(--sw-radius-sm);
+  background: var(--sw-danger-bg);
+  color: var(--sw-danger-text);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.login-form {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.input-with-icon {
+  position: relative;
+
+  .field-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--sw-text-muted);
+    display: flex;
+  }
+
+  input {
+    padding-left: 38px;
+  }
+
+  .has-right-btn {
+    padding-right: 40px;
+  }
+}
+
+.pwd-toggle {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  color: var(--sw-text-muted);
+  cursor: pointer;
+  display: flex;
+  padding: 4px;
+}
+
+.form-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+.checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--sw-text-secondary);
+  cursor: pointer;
+}
+
+.forgot-link {
+  border: none;
+  background: transparent;
+  color: var(--sw-teal-600);
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.submit-btn {
+  width: 100%;
+  height: 42px;
+  margin-top: 4px;
+}
+
+.recovery-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.recovery-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.recovery-success {
+  text-align: center;
+  color: var(--sw-success);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+
+  h4 {
+    color: var(--sw-text-primary);
+    font-size: 16px;
+  }
+
+  p {
+    font-size: 13.5px;
+    color: var(--sw-text-secondary);
+  }
+}
+

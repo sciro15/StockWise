@@ -1,0 +1,169 @@
+<div class="shell-layout">
+  @if (mobileMenuOpen()) {
+    <div class="mobile-backdrop" (click)="closeMobileMenu()"></div>
+  }
+
+  <aside class="sidebar" [class.open]="mobileMenuOpen()">
+    <div class="sidebar-top">
+      <a routerLink="/dashboard" (click)="closeMobileMenu()">
+        <app-stockwise-logo theme="dark" [showSubtitle]="true" />
+      </a>
+      <button
+        type="button"
+        class="mobile-close-btn"
+        (click)="closeMobileMenu()"
+        aria-label="Cerrar menú"
+      >
+        <lucide-icon [img]="XIcon" [size]="18" />
+      </button>
+    </div>
+
+    <nav class="sidebar-nav" aria-label="Navegación principal">
+      @for (item of navItems; track item.path) {
+        <a
+          [routerLink]="item.path"
+          routerLinkActive="active"
+          (click)="closeMobileMenu()"
+          class="nav-link"
+        >
+          <lucide-icon [img]="item.icon" [size]="18" />
+          <span class="nav-label">{{ item.label }}</span>
+          @if (item.showBadge && store.alerts().length > 0) {
+            <span class="nav-badge">{{ store.alerts().length }}</span>
+          }
+        </a>
+      }
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="business-pill">
+        <lucide-icon [img]="BoxesIcon" [size]="15" />
+        <div class="business-meta">
+          <span class="business-name">{{ store.settings().business.commercialName }}</span>
+          <span class="business-loc">{{ store.settings().business.city }} · COP</span>
+        </div>
+      </div>
+
+      <div class="user-card">
+        <div class="user-avatar">{{ userInitials() }}</div>
+        <div class="user-info">
+          <div class="user-name">{{ auth.session()?.fullName }}</div>
+          <div class="user-role">{{ auth.session()?.role }}</div>
+        </div>
+        <button
+          type="button"
+          class="logout-btn"
+          (click)="auth.logout()"
+          title="Cerrar sesión"
+          aria-label="Cerrar sesión"
+        >
+          <lucide-icon [img]="LogOutIcon" [size]="17" />
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-area">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button
+          type="button"
+          class="sw-icon-btn mobile-menu-btn"
+          (click)="toggleMobileMenu()"
+          aria-label="Abrir menú lateral"
+        >
+          <lucide-icon [img]="MenuIcon" [size]="20" />
+        </button>
+
+        <div class="global-search">
+          <span class="search-icon">
+            <lucide-icon [img]="SearchIcon" [size]="16" />
+          </span>
+          <input
+            type="search"
+            class="search-input"
+            placeholder="Buscar producto, SKU o código de barras..."
+            [value]="globalSearch()"
+            (input)="onSearchInput($event)"
+            (focus)="searchFocused.set(true)"
+            (keydown.enter)="goToProductSearch()"
+          />
+
+          @if (searchFocused() && globalSearch().trim().length > 0) {
+            <div class="search-dropdown">
+              @if (searchResults().length === 0) {
+                <div class="search-empty">Sin coincidencias para "{{ globalSearch() }}"</div>
+              } @else {
+                @for (p of searchResults(); track p.id) {
+                  <button
+                    type="button"
+                    class="search-item"
+                    (click)="goToProductSearch(p.sku)"
+                  >
+                    <div>
+                      <div class="search-item-name">{{ p.name }}</div>
+                      <div class="search-item-sub">{{ p.sku }} · Stock: {{ p.stock }} uds</div>
+                    </div>
+                    <span class="search-item-price">{{ formatPrice(p.salePrice) }}</span>
+                  </button>
+                }
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <a routerLink="/inventario" class="sw-btn sw-btn-primary sw-btn-sm top-cta">
+          <lucide-icon [img]="PlusIcon" [size]="15" />
+          <span>Registrar movimiento</span>
+        </a>
+
+        <div class="notif-wrapper">
+          <button
+            type="button"
+            class="notif-btn"
+            (click)="toggleNotifications()"
+            aria-label="Ver notificaciones y alertas"
+          >
+            <lucide-icon [img]="BellIcon" [size]="19" />
+            @if (store.alerts().length > 0) {
+              <span class="notif-count">{{ store.alerts().length }}</span>
+            }
+          </button>
+
+          @if (notificationsOpen()) {
+            <div class="notif-dropdown">
+              <div class="notif-header">
+                <span>Alertas activas ({{ store.alerts().length }})</span>
+                <button type="button" class="link-btn" (click)="goToAlerts()">Ver todas</button>
+              </div>
+              <div class="notif-list">
+                @for (alert of topAlerts(); track alert.id) {
+                  <button type="button" class="notif-item" (click)="goToAlerts()">
+                    <div class="notif-title">
+                      <span
+                        class="severity-dot"
+                        [class.critical]="alert.priority === 'CRITICA'"
+                        [class.high]="alert.priority === 'ALTA'"
+                      ></span>
+                      {{ alert.productName }}
+                    </div>
+                    <div class="notif-desc">{{ alert.recommendation }}</div>
+                  </button>
+                } @empty {
+                  <div class="search-empty">No hay alertas pendientes.</div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </header>
+
+    <main class="page-content">
+      <router-outlet />
+    </main>
+  </div>
+</div>
+

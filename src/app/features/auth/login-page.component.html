@@ -1,0 +1,180 @@
+<div class="auth-layout">
+  <section class="auth-brand-panel">
+    <div class="brand-content">
+      <app-stockwise-logo theme="dark" />
+
+      <div class="brand-hero">
+        <span class="eyebrow">SaaS para pymes en Colombia · COP</span>
+        <h1>Controla tus productos, anticipa tus necesidades y toma mejores decisiones.</h1>
+        <p>
+          Centraliza entradas, salidas, alertas de reposición y valoración de inventario en una
+          plataforma diseñada para comercios modernos.
+        </p>
+      </div>
+
+      <div class="feature-list">
+        <div class="feature-item">
+          <div class="feature-icon"><lucide-icon [img]="TrendingUpIcon" [size]="18" /></div>
+          <div>
+            <strong>Trazabilidad en tiempo real</strong>
+            <span>Cada movimiento actualiza existencias, valoración y métricas al instante.</span>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon"><lucide-icon [img]="SparklesIcon" [size]="18" /></div>
+          <div>
+            <strong>Alertas basadas en reglas operativas</strong>
+            <span>Detecta agotamientos, stock bajo, excesos y baja rotación sin hojas de cálculo.</span>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon"><lucide-icon [img]="ShieldCheckIcon" [size]="18" /></div>
+          <div>
+            <strong>Entorno Demo · TechStore Medellín</strong>
+            <span>Datos consistentes en pesos colombianos listos para demostración comercial.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="brand-footer">
+      <span>StockWise v1.0 · Zona horaria America/Bogota</span>
+    </div>
+  </section>
+
+  <section class="auth-form-panel">
+    <div class="auth-card">
+      <div class="mobile-logo">
+        <app-stockwise-logo theme="light" />
+      </div>
+
+      <div class="card-head">
+        <h2>Iniciar sesión</h2>
+        <p>Ingresa con tu cuenta de administrador para gestionar tu inventario.</p>
+      </div>
+
+      <div class="demo-box">
+        <div>
+          <div class="demo-title">Credenciales de demostración</div>
+          <div class="demo-creds">
+            <span><strong>Correo:</strong> admin@stockwise.com</span>
+            <span><strong>Contraseña:</strong> StockWise123</span>
+          </div>
+        </div>
+        <button type="button" class="sw-btn sw-btn-secondary sw-btn-sm" (click)="fillDemoCredentials()">
+          Usar demo
+        </button>
+      </div>
+
+      @if (errorMsg()) {
+        <div class="alert-error" role="alert">{{ errorMsg() }}</div>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="login-form">
+        <div class="sw-field">
+          <label class="sw-label" for="login-email">Correo electrónico</label>
+          <div class="input-with-icon">
+            <span class="field-icon"><lucide-icon [img]="MailIcon" [size]="16" /></span>
+            <input
+              id="login-email"
+              type="email"
+              class="sw-input"
+              formControlName="email"
+              placeholder="admin@stockwise.com"
+              [class.invalid]="form.controls.email.invalid && form.controls.email.touched"
+            />
+          </div>
+          @if (form.controls.email.invalid && form.controls.email.touched) {
+            <span class="sw-error-msg">Ingresa un correo electrónico válido.</span>
+          }
+        </div>
+
+        <div class="sw-field">
+          <label class="sw-label" for="login-password">Contraseña</label>
+          <div class="input-with-icon">
+            <span class="field-icon"><lucide-icon [img]="LockIcon" [size]="16" /></span>
+            <input
+              id="login-password"
+              [type]="showPassword() ? 'text' : 'password'"
+              class="sw-input has-right-btn"
+              formControlName="password"
+              placeholder="••••••••"
+              [class.invalid]="form.controls.password.invalid && form.controls.password.touched"
+            />
+            <button
+              type="button"
+              class="pwd-toggle"
+              (click)="showPassword.set(!showPassword())"
+              aria-label="Mostrar u ocultar contraseña"
+            >
+              <lucide-icon [img]="showPassword() ? EyeOffIcon : EyeIcon" [size]="16" />
+            </button>
+          </div>
+          @if (form.controls.password.invalid && form.controls.password.touched) {
+            <span class="sw-error-msg">La contraseña debe tener al menos 6 caracteres.</span>
+          }
+        </div>
+
+        <div class="form-options">
+          <label class="checkbox-label">
+            <input type="checkbox" formControlName="rememberMe" />
+            <span>Recordar sesión</span>
+          </label>
+          <button type="button" class="forgot-link" (click)="openRecovery()">
+            ¿Olvidaste tu contraseña?
+          </button>
+        </div>
+
+        <button type="submit" class="sw-btn sw-btn-primary submit-btn">
+          <span>Ingresar a StockWise</span>
+          <lucide-icon [img]="ArrowRightIcon" [size]="17" />
+        </button>
+      </form>
+    </div>
+  </section>
+</div>
+
+<app-modal
+  [open]="recoveryOpen()"
+  title="Recuperar contraseña"
+  subtitle="Simulación de restablecimiento de acceso por correo electrónico"
+  maxWidth="440px"
+  (closed)="recoveryOpen.set(false)"
+>
+  @if (!recoverySent()) {
+    <form [formGroup]="recoveryForm" (ngSubmit)="submitRecovery()" class="recovery-form">
+      <div class="sw-field">
+        <label class="sw-label" for="recovery-email">Correo registrado</label>
+        <input
+          id="recovery-email"
+          type="email"
+          class="sw-input"
+          formControlName="email"
+          placeholder="tu@negocio.co"
+        />
+        @if (recoveryForm.controls.email.invalid && recoveryForm.controls.email.touched) {
+          <span class="sw-error-msg">Ingresa un correo electrónico válido.</span>
+        }
+      </div>
+      <div class="recovery-actions">
+        <button type="button" class="sw-btn sw-btn-secondary" (click)="recoveryOpen.set(false)">
+          Cancelar
+        </button>
+        <button type="submit" class="sw-btn sw-btn-primary">Enviar instrucciones</button>
+      </div>
+    </form>
+  } @else {
+    <div class="recovery-success">
+      <lucide-icon [img]="CheckCircleIcon" [size]="36" />
+      <h4>Solicitud procesada</h4>
+      <p>
+        En un entorno productivo, hemos enviado un enlace temporal de recuperación a
+        <strong>{{ recoveryForm.controls.email.value }}</strong>.
+      </p>
+      <button type="button" class="sw-btn sw-btn-primary" (click)="recoveryOpen.set(false)">
+        Entendido
+      </button>
+    </div>
+  }
+</app-modal>
+

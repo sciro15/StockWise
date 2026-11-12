@@ -1,0 +1,133 @@
+.filter-select {
+  width: auto;
+  min-width: 175px;
+}
+
+.result-count {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--sw-text-secondary);
+}
+
+.product-thumb {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid var(--sw-border);
+  background: var(--sw-surface-muted);
+}
+
+.product-name {
+  font-weight: 600;
+  color: var(--sw-text-primary);
+}
+
+.product-barcode {
+  font-size: 11.5px;
+  color: var(--sw-text-secondary);
+}
+
+.sku-tag {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: var(--sw-surface-muted);
+  border: 1px solid var(--sw-border);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--sw-navy-900);
+}
+
+.supplier-cell {
+  max-width: 190px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.row-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.form-alert {
+  padding: 10px 12px;
+  border-radius: var(--sw-radius-sm);
+  background: var(--sw-danger-bg);
+  color: var(--sw-danger-text);
+  font-size: 13px;
+  margin-bottom: 14px;
+}
+
+.img-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.upload-btn {
+  flex-shrink: 0;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+  padding-top: 14px;
+  border-top: 1px solid var(--sw-border);
+}
+
+.detail-top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.detail-img {
+  width: 68px;
+  height: 68px;
+  border-radius: 12px;
+  border: 1px solid var(--sw-border);
+  object-fit: cover;
+}
+
+.detail-desc {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--sw-text-secondary);
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+
+  @media (max-width: 520px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.detail-box {
+  padding: 11px 13px;
+  border-radius: var(--sw-radius-sm);
+  background: var(--sw-surface-muted);
+  border: 1px solid var(--sw-border);
+
+  span {
+    display: block;
+    font-size: 11.5px;
+    color: var(--sw-text-secondary);
+  }
+
+  strong {
+    display: block;
+    margin-top: 2px;
+    font-size: 13.5px;
+    color: var(--sw-text-primary);
+  }
+}
+
